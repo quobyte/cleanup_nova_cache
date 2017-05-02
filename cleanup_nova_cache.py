@@ -104,7 +104,13 @@ for instancepath in full_instance_dirnames:
         if args.verbose:
             print("qemu-img result: {}".format(qemu_json))
         # NOTE: Nova uses absolute paths for backing files, we rely on this here!
-        b = qemu_json["backing-filename"]
+        if "backing-filename" in qemu_json:
+            b = qemu_json["backing-filename"]
+        else:
+            if args.verbose:
+                print("{} has no backing file set, ignoring..."
+                      .format(instancepath))
+            continue
         if args.verbose:
             print("{} is a backing file.".format(b))
         if b in oldfiles:
