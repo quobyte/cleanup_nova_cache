@@ -103,28 +103,30 @@ for instancepath in full_instance_dirnames:
         qemu_json = json.loads(qemu_result.decode("utf-8"))
         if args.verbose:
             print("qemu-img result: {}".format(qemu_json))
-        # NOTE: Nova uses absolute paths for backing files, we rely on this here!
+        # NOTE(kaisers): Nova uses absolute paths for backing files, we rely
+        # on this here!
         if "backing-filename" in qemu_json:
             b = qemu_json["backing-filename"]
+            if args.verbose:
+                print("{} is a backing file.".format(b))
+            if b in oldfiles:
+                if args.verbose:
+                    print("{} is still in use, ignoring.".format(b))
+                oldfiles.remove(b)
+                if b not in used_paths:
+                    used_paths.append(b)
+            elif b not in used_paths and b not in full_filenames:
+                print("ERROR! Unable to locate backing file {} !!".format(b))
+                if args.delete:
+                    print(
+                        "Deactivating deletion flag as one or more backing files"
+                        " could not be located.")
+                    args.delete = False
         else:
             if args.verbose:
                 print("{} has no backing file set, ignoring..."
                       .format(instancepath))
-            continue
-        if args.verbose:
-            print("{} is a backing file.".format(b))
-        if b in oldfiles:
-            if args.verbose:
-                print("{} is still in use, ignoring.".format(b))
-            oldfiles.remove(b)
-            if b not in used_paths:
-                used_paths.append(b)
-        elif b not in used_paths:
-            print("ERROR! Unable to locate backing file {} !!".format(b))
-            if args.delete:
-                print("Deactivating deletion flag as one or more backing files"
-                      " could not be located.")
-                args.delete = False
+
 if args.verbose:
     print("Leftover deletion candidates: {}".format(oldfiles))
 

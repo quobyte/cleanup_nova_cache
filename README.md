@@ -26,4 +26,4 @@ each others base images. Usage:
       -r, --readconfig      read path data from the nova.conf file
       -a AGE, --age AGE     minimum file age in seconds
       -v, --verbose         provide logging output during operation
-      -d, --delete          explicitely delete unused images.
+      -d, --delete          explicitly delete unused images.
